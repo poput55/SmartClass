@@ -36,6 +36,7 @@ import kotlinx.coroutines.delay
 fun SplashScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToTeacherHome: () -> Unit,
+    onNavigateToAdmin: () -> Unit,
     onNavigateToAuth: () -> Unit
 ) {
     val composition by rememberLottieComposition(
@@ -53,9 +54,20 @@ fun SplashScreen(
             delay(300)
             // Проверка авторизации и роли
             if (AuthManager.isSignedIn()) {
+                // Проверка блокировки
+                if (AuthManager.isCurrentUserBlocked()) {
+                    Log.d("SplashScreen", "Пользователь заблокирован -> Auth")
+                    AuthManager.signOut()
+                    onNavigateToAuth()
+                    return@LaunchedEffect
+                }
                 val userRole = AuthManager.getCurrentUserRole()
                 Log.d("SplashScreen", "userRole = $userRole")
                 when (userRole) {
+                    UserRole.ADMIN -> {
+                        Log.d("SplashScreen", "Навигация на Admin")
+                        onNavigateToAdmin()
+                    }
                     UserRole.TEACHER -> {
                         Log.d("SplashScreen", "Навигация на TeacherHome")
                         onNavigateToTeacherHome()
@@ -108,6 +120,7 @@ fun SplashScreen(
         SplashScreen(
             onNavigateToHome = {},
             onNavigateToTeacherHome = {},
+            onNavigateToAdmin = {},
             onNavigateToAuth = {}
         )
     }

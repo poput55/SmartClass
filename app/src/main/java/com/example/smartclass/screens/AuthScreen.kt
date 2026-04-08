@@ -377,6 +377,21 @@ fun AuthScreen(
                                     } else null,
                                     modifier = Modifier.weight(1f)
                                 )
+                                FilterChip(
+                                    selected = selectedRole == UserRole.ADMIN,
+                                    onClick = { selectedRole = UserRole.ADMIN },
+                                    label = { Text("Админ") },
+                                    leadingIcon = if (selectedRole == UserRole.ADMIN) {
+                                        {
+                                            Icon(
+                                                imageVector = Icons.Default.Check,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    } else null,
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
 
                             // Выбор класса (только для ученика)

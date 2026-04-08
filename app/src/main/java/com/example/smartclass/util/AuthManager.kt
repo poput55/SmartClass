@@ -13,7 +13,8 @@ private const val TAG = "AuthManager"
  */
 enum class UserRole {
     STUDENT,  // Ученик
-    TEACHER   // Учитель
+    TEACHER,   // Учитель
+    ADMIN      // Администратор
 }
 
 /**
@@ -222,6 +223,91 @@ object AuthManager {
             Log.d(TAG, "setUserGrade: класс установлен = $grade")
         } catch (e: Exception) {
             Log.e(TAG, "setUserGrade: ошибка - ${e.message}", e)
+        }
+    }
+
+    // ==================== ADMIN FUNCTIONS ====================
+
+    /**
+     * Получить всех пользователей
+     */
+    suspend fun getAllUsers(): List<Map<String, Any?>> {
+        return try {
+            val snapshot = firestore.collection("users").get().await()
+            snapshot.documents.map { doc ->
+                mapOf(
+                    "id" to doc.id,
+                    "email" to doc.getString("email"),
+                    "role" to doc.getString("role"),
+                    "firstName" to doc.getString("firstName"),
+                    "lastName" to doc.getString("lastName"),
+                    "fullName" to doc.getString("fullName"),
+                    "grade" to doc.getLong("grade")?.toInt(),
+                    "isBlocked" to (doc.getBoolean("isBlocked") ?: false),
+                    "createdAt" to doc.getLong("createdAt")
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "getAllUsers: ошибка - ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    /**
+     * Изменить роль пользователя
+     */
+    suspend fun changeUserRole(userId: String, newRole: UserRole): Result<Unit> {
+        return try {
+            firestore.collection("users").document(userId)
+                .update("role", newRole.name).await()
+            Log.d(TAG, "changeUserRole: роль изменена для $userId на $newRole")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "changeUserRole: ошибка - ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Заблокировать/разблокировать пользователя
+     */
+    suspend fun setBlocked(userId: String, blocked: Boolean): Result<Unit> {
+        return try {
+            firestore.collection("users").document(userId)
+                .update("isBlocked", blocked).await()
+            Log.d(TAG, "setBlocked: статус $userId = $blocked")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "setBlocked: ошибка - ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Удалить пользователя
+     */
+    suspend fun deleteUser(userId: String): Result<Unit> {
+        return try {
+            firestore.collection("users").document(userId).delete().await()
+            Log.d(TAG, "deleteUser: пользователь $userId удалён")
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "deleteUser: ошибка - ${e.message}", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Проверить, заблокирован ли текущий пользователь
+     */
+    suspend fun isCurrentUserBlocked(): Boolean {
+        val userId = auth.currentUser?.uid ?: return false
+        return try {
+            val document = firestore.collection("users").document(userId).get().await()
+            document.getBoolean("isBlocked") ?: false
+        } catch (e: Exception) {
+            Log.e(TAG, "isCurrentUserBlocked: ошибка - ${e.message}", e)
+            false
         }
     }
 }
