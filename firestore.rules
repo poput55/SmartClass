@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Правила для коллекции users
+    match /users/{userId} {
+      // Все авторизованные пользователи могут читать профили других (для получения роли)
+      allow read: if request.auth != null;
+      // Пользователь может редактировать свой профиль
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Правила для коллекции homework
+    match /homework/{homeworkId} {
+      // Чтение: все авторизованные пользователи
+      allow read: if request.auth != null;
+      
+      // Создание: только учителя
+      allow create: if request.auth != null && 
+                       exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'TEACHER';
+      
+      // Обновление/удаление: только учитель который создал
+      allow update, delete: if request.auth != null && 
+                               resource.data.teacherId == request.auth.uid;
+      
+      // Ученики могут обновлять только поле attempts (для отправки результатов тестов)
+      allow update: if request.auth != null &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['attempts', 'isCompleted']);
+    }
+  }
+}
