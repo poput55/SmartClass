@@ -41,7 +41,8 @@ fun HomeScreen(
     onNavigateToProgress: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToCreateHomework: () -> Unit,
-    onNavigateToHomeworkList: () -> Unit
+    onNavigateToHomeworkList: () -> Unit,
+    onNavigateToAdmin: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -166,6 +167,17 @@ fun HomeScreen(
                 else -> {
                     // Если роль не определена, показываем все основные кнопки
                 }
+            }
+
+            // Карточка админ-панели (только для админов)
+            if (userRole == UserRole.ADMIN) {
+                MenuCard(
+                    title = "Админ-панель",
+                    subtitle = "Управление пользователями",
+                    icon = Icons.Default.AdminPanelSettings,
+                    gradientColors = listOf(Color(0xFF6750A4), Color(0xFF9A4D8E)),
+                    onClick = onNavigateToAdmin
+                )
             }
 
             MenuCard(

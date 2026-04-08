@@ -144,7 +144,8 @@ fun NavGraph(
                 onNavigateToProgress = { navController.navigate(Screen.Progress.route) },
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
                 onNavigateToCreateHomework = { navController.navigate(Screen.CreateHomework.route) },
-                onNavigateToHomeworkList = { navController.navigate(Screen.HomeworkList.route) }
+                onNavigateToHomeworkList = { navController.navigate(Screen.HomeworkList.route) },
+                onNavigateToAdmin = { navController.navigate(Screen.Admin.route) }
             )
         }
 
