@@ -88,7 +88,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(Color(0xFFF5F5F5)),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -103,7 +103,7 @@ fun SplashScreen(
 
             Text(
                 text = "SmartClass",
-                color = MaterialTheme.colorScheme.onBackground,
+                color = Color.Black,
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )
