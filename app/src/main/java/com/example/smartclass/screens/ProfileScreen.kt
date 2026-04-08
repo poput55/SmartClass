@@ -339,41 +339,6 @@ fun ProfileScreen(
                 )
             }
 
-            // Кнопка админ-панели (только для админов)
-            var isAdmin by remember { mutableStateOf(false) }
-            LaunchedEffect(Unit) {
-                isAdmin = AuthManager.getCurrentUserRole() == com.example.smartclass.util.UserRole.ADMIN
-            }
-            if (isAdmin) {
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = onNavigateToAdmin,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color(0xFF6750A4)
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(
-                        width = 2.dp,
-                        brush = androidx.compose.ui.graphics.SolidColor(Color(0xFF6750A4))
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AdminPanelSettings,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Админ-панель",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-
             Spacer(modifier = Modifier.weight(1f))
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color.Gray.copy(alpha = 0.2f))

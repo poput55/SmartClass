@@ -34,13 +34,22 @@ fun AdminScreen(
     var showRoleDialog by remember { mutableStateOf(false) }
     var selectedUser by remember { mutableStateOf<Map<String, Any?>?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    var isAccessChecked by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        val role = AuthManager.getCurrentUserRole()
+        if (role != UserRole.ADMIN) {
+            onNavigateBack()
+            return@LaunchedEffect
+        }
+        isAccessChecked = true
         loadUsers { loadedUsers ->
             users = loadedUsers
             isLoading = false
         }
     }
+
+    if (!isAccessChecked) return
 
     val filteredUsers = users.filter { user ->
         val name = user["fullName"] as? String ?: user["firstName"] as? String ?: ""

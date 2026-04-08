@@ -169,17 +169,6 @@ fun HomeScreen(
                 }
             }
 
-            // Карточка админ-панели (только для админов)
-            if (userRole == UserRole.ADMIN) {
-                MenuCard(
-                    title = "Админ-панель",
-                    subtitle = "Управление пользователями",
-                    icon = Icons.Default.AdminPanelSettings,
-                    gradientColors = listOf(Color(0xFF6750A4), Color(0xFF9A4D8E)),
-                    onClick = onNavigateToAdmin
-                )
-            }
-
             MenuCard(
                 title = "Темы и уроки",
                 subtitle = "Изучайте концепции алгебры шаг за шагом",
