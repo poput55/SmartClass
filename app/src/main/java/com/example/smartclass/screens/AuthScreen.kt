@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -55,6 +56,9 @@ fun AuthScreen(
     var selectedGrade by remember { mutableStateOf(7) }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var adminTapCount by remember { mutableStateOf(0) }
+    var showAdminCode by remember { mutableStateOf(false) }
+    var adminCodeInput by remember { mutableStateOf("") }
 
     // Обработка состояний авторизации
     LaunchedEffect(authState) {
@@ -377,22 +381,21 @@ fun AuthScreen(
                                     } else null,
                                     modifier = Modifier.weight(1f)
                                 )
-                                FilterChip(
-                                    selected = selectedRole == UserRole.ADMIN,
-                                    onClick = { selectedRole = UserRole.ADMIN },
-                                    label = { Text("Админ") },
-                                    leadingIcon = if (selectedRole == UserRole.ADMIN) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    } else null,
-                                    modifier = Modifier.weight(1f)
-                                )
                             }
+
+                            // Скрытый вход для админа (5 тапов по заголовку "Роль")
+                            Text(
+                                text = "Роль",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.clickable {
+                                    adminTapCount++
+                                    if (adminTapCount >= 5) {
+                                        showAdminCode = true
+                                        adminTapCount = 0
+                                    }
+                                }
+                            )
 
                             // Выбор класса (только для ученика)
                             AnimatedVisibility(
@@ -583,6 +586,38 @@ fun AuthScreen(
             }
 
         }
+    }
+
+    // Скрытый диалог для активации админа (секретный код: "admin2024")
+    if (showAdminCode) {
+        AlertDialog(
+            onDismissRequest = { showAdminCode = false },
+            title = { Text("Код доступа") },
+            text = {
+                OutlinedTextField(
+                    value = adminCodeInput,
+                    onValueChange = { adminCodeInput = it },
+                    label = { Text("Введите код") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (adminCodeInput == "admin2024") {
+                        selectedRole = UserRole.ADMIN
+                        showAdminCode = false
+                        adminCodeInput = ""
+                    }
+                }) {
+                    Text("Подтвердить")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAdminCode = false }) {
+                    Text("Отмена")
+                }
+            }
+        )
     }
 }
 

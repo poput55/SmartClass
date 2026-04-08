@@ -85,13 +85,6 @@ fun NavGraph(
                         }
                     }
                 },
-                onNavigateToAdmin = {
-                    navController.navigate(Screen.Admin.route) {
-                        popUpTo(Screen.Splash.route) {
-                            inclusive = true
-                        }
-                    }
-                },
                 onNavigateToAuth = {
                     navController.navigate(Screen.Auth.route) {
                         popUpTo(Screen.Splash.route) {
