@@ -355,9 +355,9 @@ fun ProfileScreen(
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color(0xFF6750A4)
                     ),
-                    border = ButtonDefaults.outlinedButtonBorder().copy(
-                        brush = androidx.compose.ui.graphics.SolidColor(Color(0xFF6750A4)),
-                        width = 2.dp
+                    border = androidx.compose.foundation.BorderStroke(
+                        width = 2.dp,
+                        brush = androidx.compose.ui.graphics.SolidColor(Color(0xFF6750A4))
                     )
                 ) {
                     Icon(

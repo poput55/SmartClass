@@ -72,6 +72,10 @@ class HomeworkViewModel : ViewModel() {
                         homeworkCollection.whereEqualTo("grade", userGrade ?: 7)
                             .get().await()
                     }
+                    UserRole.ADMIN -> {
+                        // Админ видит все ДЗ
+                        homeworkCollection.get().await()
+                    }
                 }
 
                 val homeworkList = snapshots.toObjects(Homework::class.java)
