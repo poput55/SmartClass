@@ -190,15 +190,15 @@ fun AdminScreen(
 
     // Диалог смены роли
     if (showRoleDialog && selectedUser != null) {
+        val currentUser = selectedUser
         RoleChangeDialog(
-            user = selectedUser!!,
+            user = currentUser!!,
             onDismiss = {
                 showRoleDialog = false
-                selectedUser = null
             },
             onRoleChanged = { newRole ->
                 scope.launch {
-                    val userId = selectedUser!!["id"] as String
+                    val userId = currentUser["id"] as String
                     val result = AuthManager.changeUserRole(userId, newRole)
                     if (result.isSuccess) {
                         loadUsers { users = it }
@@ -208,7 +208,6 @@ fun AdminScreen(
                     }
                 }
                 showRoleDialog = false
-                selectedUser = null
             }
         )
     }
