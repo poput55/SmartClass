@@ -2,28 +2,42 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Вспомогательная функция для проверки роли админа
+    function isAdmin(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role == 'ADMIN';
+    }
+
     // Правила для коллекции users
     match /users/{userId} {
       // Все авторизованные пользователи могут читать профили других (для получения роли)
       allow read: if request.auth != null;
-      // Пользователь может редактировать свой профиль
-      allow write: if request.auth != null && request.auth.uid == userId;
+      // Пользователь может редактировать свой профиль ИЛИ админ может редактировать всех
+      allow write: if request.auth != null && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
+      // Удаление: только сам пользователь или админ
+      allow delete: if request.auth != null && (
+        request.auth.uid == userId ||
+        isAdmin(request.auth.uid)
+      );
     }
 
     // Правила для коллекции homework
     match /homework/{homeworkId} {
       // Чтение: все авторизованные пользователи
       allow read: if request.auth != null;
-      
-      // Создание: только учителя
-      allow create: if request.auth != null && 
+
+      // Создание: только учителя или админ
+      allow create: if request.auth != null &&
                        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-                       get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'TEACHER';
-      
-      // Обновление/удаление: только учитель который создал
-      allow update, delete: if request.auth != null && 
-                               resource.data.teacherId == request.auth.uid;
-      
+                       (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'TEACHER' ||
+                        isAdmin(request.auth.uid));
+
+      // Обновление/удаление: только учитель который создал, или админ
+      allow update, delete: if request.auth != null &&
+                               (resource.data.teacherId == request.auth.uid || isAdmin(request.auth.uid));
+
       // Ученики могут обновлять только поле attempts (для отправки результатов тестов)
       allow update: if request.auth != null &&
                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['attempts', 'isCompleted']);
