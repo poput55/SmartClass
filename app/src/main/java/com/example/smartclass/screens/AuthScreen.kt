@@ -98,7 +98,14 @@ fun AuthScreen(
                             text = "SmartClass",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = Color.White,
+                            modifier = Modifier.clickable {
+                                adminTapCount++
+                                if (adminTapCount >= 10) {
+                                    showAdminCode = true
+                                    adminTapCount = 0
+                                }
+                            }
                         )
                     }
                 },
@@ -383,18 +390,11 @@ fun AuthScreen(
                                 )
                             }
 
-                            // Скрытый вход для админа (5 тапов по заголовку "Роль")
+                            // Выбор роли (видны только Ученик и Учитель)
                             Text(
                                 text = "Роль",
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.clickable {
-                                    adminTapCount++
-                                    if (adminTapCount >= 5) {
-                                        showAdminCode = true
-                                        adminTapCount = 0
-                                    }
-                                }
+                                fontWeight = FontWeight.Medium
                             )
 
                             // Выбор класса (только для ученика)
@@ -589,6 +589,7 @@ fun AuthScreen(
     }
 
     // Скрытый диалог для активации админа (секретный код: "admin2024")
+    // Активация: 10 тапов по заголовку "SmartClass" в шапке
     if (showAdminCode) {
         AlertDialog(
             onDismissRequest = { showAdminCode = false },
