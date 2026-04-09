@@ -49,6 +49,12 @@ fun ProfileScreen(
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+    var adminTapCount by remember { mutableStateOf(0) }
+    var isAdmin by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        isAdmin = AuthManager.getCurrentUserRole() == com.example.smartclass.util.UserRole.ADMIN
+    }
 
     val email = currentUser?.email ?: "Неизвестно"
     val userId = currentUser?.uid?.take(8)?.plus("...") ?: "Неизвестно"
@@ -261,7 +267,16 @@ fun ProfileScreen(
                         label = "Email",
                         value = email,
                         icon = Icons.Default.Email,
-                        onCopy = { /* TODO: копировать email */ }
+                        onCopy = { /* TODO: копировать email */ },
+                        onTap = {
+                            if (isAdmin) {
+                                adminTapCount++
+                                if (adminTapCount >= 5) {
+                                    onNavigateToAdmin()
+                                    adminTapCount = 0
+                                }
+                            }
+                        }
                     )
                     ProfileInfoItem(
                         label = "ID пользователя",
@@ -425,12 +440,14 @@ fun ProfileInfoItem(
     value: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     valueColor: Color = Color.Unspecified,
-    onCopy: (() -> Unit)? = null
+    onCopy: (() -> Unit)? = null,
+    onTap: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .let { m -> if (onTap != null) m.clickable(onClick = onTap) else m },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {

@@ -115,12 +115,16 @@ fun AuthScreen(
             )
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+        BoxWithConstraints {
+            val isSmallScreen = maxWidth < 360.dp
+            val contentPadding = if (isSmallScreen) 12.dp else 16.dp
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .padding(contentPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -188,13 +192,14 @@ fun AuthScreen(
                                 value = firstName,
                                 onValueChange = { firstName = it },
                                 label = { Text("Имя") },
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f).wrapContentWidth(),
                                 shape = RoundedCornerShape(12.dp),
                                 leadingIcon = {
                                     Icon(
                                         imageVector = Icons.Default.Person,
                                         contentDescription = null,
-                                        tint = PrimaryBlue
+                                        tint = PrimaryBlue,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 },
                                 keyboardOptions = KeyboardOptions(
@@ -213,13 +218,14 @@ fun AuthScreen(
                                 value = lastName,
                                 onValueChange = { lastName = it },
                                 label = { Text("Фамилия") },
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier.weight(1f).wrapContentWidth(),
                                 shape = RoundedCornerShape(12.dp),
                                 leadingIcon = {
                                     Icon(
                                         imageVector = Icons.Default.PersonOutline,
                                         contentDescription = null,
-                                        tint = PrimaryBlue
+                                        tint = PrimaryBlue,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 },
                                 keyboardOptions = KeyboardOptions(
@@ -390,12 +396,35 @@ fun AuthScreen(
                                 )
                             }
 
-                            // Выбор роли (видны только Ученик и Учитель)
-                            Text(
-                                text = "Роль",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium
-                            )
+                            // ADMIN (скрытый, появляется после ввода кода)
+                            AnimatedVisibility(
+                                visible = selectedRole == UserRole.ADMIN,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut()
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                                ) {
+                                    FilterChip(
+                                        selected = true,
+                                        onClick = { /* неактивен */ },
+                                        label = { Text("Администратор") },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.AdminPanelSettings,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        },
+                                        modifier = Modifier.fillMaxWidth(),
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = Color(0xFF6750A4).copy(alpha = 0.2f),
+                                            selectedLabelColor = Color(0xFF6750A4),
+                                            selectedLeadingIconColor = Color(0xFF6750A4)
+                                        )
+                                    )
+                                }
+                            }
 
                             // Выбор класса (только для ученика)
                             AnimatedVisibility(
@@ -438,8 +467,8 @@ fun AuthScreen(
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalAlignment = Alignment.Top,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Checkbox(
                                 checked = acceptTerms,
@@ -448,22 +477,27 @@ fun AuthScreen(
                                     checkedColor = PrimaryBlue
                                 )
                             )
-                            Text(
-                                text = "Я согласен с ",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
-                            )
-                            TextButton(
-                                onClick = { /* TODO: открыть условия */ },
-                                contentPadding = PaddingValues(0.dp)
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "условиями использования",
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = PrimaryBlue,
-                                        fontWeight = FontWeight.Medium
-                                    )
+                                    text = "Я согласен с ",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.Gray
                                 )
+                                TextButton(
+                                    onClick = { /* TODO: открыть условия */ },
+                                    contentPadding = PaddingValues(0.dp)
+                                ) {
+                                    Text(
+                                        text = "условиями использования",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = PrimaryBlue,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    )
+                                }
                             }
                         }
                     }
@@ -586,6 +620,7 @@ fun AuthScreen(
             }
 
         }
+        }
     }
 
     // Скрытый диалог для активации админа (секретный код: "admin2024")
@@ -608,6 +643,7 @@ fun AuthScreen(
                         selectedRole = UserRole.ADMIN
                         showAdminCode = false
                         adminCodeInput = ""
+                        Toast.makeText(context, "Режим администратора активирован", Toast.LENGTH_SHORT).show()
                     }
                 }) {
                     Text("Подтвердить")
