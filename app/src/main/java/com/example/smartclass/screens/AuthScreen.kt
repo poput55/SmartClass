@@ -183,61 +183,22 @@ fun AuthScreen(
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            // Имя
-                            OutlinedTextField(
-                                value = firstName,
-                                onValueChange = { firstName = it },
-                                label = { Text("Имя") },
-                                modifier = Modifier.weight(1f).wrapContentWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Person,
-                                        contentDescription = null,
-                                        tint = PrimaryBlue,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                },
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
-                                    imeAction = ImeAction.Next
-                                ),
-                                singleLine = true,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = PrimaryBlue,
-                                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
-                                )
-                            )
-
-                            // Фамилия
-                            OutlinedTextField(
-                                value = lastName,
-                                onValueChange = { lastName = it },
-                                label = { Text("Фамилия") },
-                                modifier = Modifier.weight(1f).wrapContentWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.PersonOutline,
-                                        contentDescription = null,
-                                        tint = PrimaryBlue,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                },
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
-                                    imeAction = ImeAction.Next
-                                ),
-                                singleLine = true,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = PrimaryBlue,
-                                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
-                                )
-                            )
+                        if (isSmallScreen) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                NameInputField(firstName, { firstName = it }, "Имя", Icons.Default.Person)
+                                NameInputField(lastName, { lastName = it }, "Фамилия", Icons.Default.PersonOutline)
+                            }
+                        } else {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                NameInputField(firstName, { firstName = it }, "Имя", Icons.Default.Person)
+                                NameInputField(lastName, { lastName = it }, "Фамилия", Icons.Default.PersonOutline)
+                            }
                         }
                     }
 
@@ -656,6 +617,39 @@ fun AuthScreen(
             }
         )
     }
+}
+
+@Composable
+private fun NameInputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        leadingIcon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = PrimaryBlue,
+                modifier = Modifier.size(20.dp)
+            )
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        ),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = PrimaryBlue,
+            unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
+        )
+    )
 }
 
 @Preview(device = "spec:parent=pixel_5,orientation=portrait", showBackground = true)
