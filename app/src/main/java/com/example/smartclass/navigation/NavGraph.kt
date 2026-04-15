@@ -150,7 +150,10 @@ fun NavGraph(
                 onNavigateToStudents = { navController.navigate(Screen.StudentsList.route) },
                 onNavigateToReports = { navController.navigate(Screen.TeacherReports.route) },
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
-                onSubjectClick = { },
+                onSubjectClick = { subject ->
+                    // Переход к списку учеников выбранного класса
+                    navController.navigate(Screen.StudentsList.route)
+                },
                 onHomeworkClick = { }
             )
         }
