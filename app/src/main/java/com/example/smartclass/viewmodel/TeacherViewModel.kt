@@ -230,19 +230,36 @@ class TeacherViewModel : ViewModel() {
      */
     private suspend fun loadAllStudents(): List<StudentItem> {
         return try {
-            val snapshot = usersCollection
+            // Загружаем всех учеников
+            val usersSnapshot = usersCollection
                 .whereEqualTo("role", "STUDENT")
                 .get()
                 .await()
 
-            snapshot.documents.mapNotNull { doc ->
+            // Загружаем все ДЗ для расчёта среднего балла
+            val allHomeworks = homeworkCollection.get().await()
+                .toObjects(Homework::class.java)
+
+            usersSnapshot.documents.mapNotNull { doc ->
                 val grade = doc.getLong("grade")?.toInt() ?: 7
+                val studentId = doc.id
+
+                // Считаем средний процент по всем попыткам ученика
+                val attempts = allHomeworks
+                    .filter { hw -> hw.attempts.any { it.studentId == studentId } }
+                    .flatMap { it.attempts }
+                    .filter { it.studentId == studentId }
+
+                val averageScore = if (attempts.isNotEmpty()) {
+                    attempts.map { it.percentage }.average().toFloat()
+                } else 0f
+
                 StudentItem(
                     id = doc.id,
                     name = doc.getString("fullName") ?: doc.getString("firstName") ?: "Без имени",
                     grade = "$grade",
                     email = doc.getString("email") ?: "",
-                    averageScore = 0f // TODO: рассчитать средний балл
+                    averageScore = averageScore
                 )
             }.sortedWith(compareBy({ it.grade }, { it.name }))
         } catch (e: Exception) {
@@ -294,6 +311,11 @@ class TeacherViewModel : ViewModel() {
         val onTime = homeworks.sumOf { it.submittedCount }
         val totalStudents = students.size
 
+        // Считаем просроченные сдачи (сдано после дедлайна)
+        val lateSubmissions = homeworks
+            .filter { it.dueDate < now }
+            .sumOf { it.submittedCount }
+
         return TeacherStats(
             totalStudents = totalStudents,
             totalHomeworks = homeworks.size,
@@ -301,7 +323,7 @@ class TeacherViewModel : ViewModel() {
             averageScore = students.map { it.averageScore }.average().toFloat(),
             overdueCount = overdue,
             submittedOnTime = onTime,
-            lateSubmissions = 0 // TODO: подсчитать
+            lateSubmissions = lateSubmissions
         )
     }
 

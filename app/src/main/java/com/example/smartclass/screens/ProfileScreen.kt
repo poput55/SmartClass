@@ -1,5 +1,8 @@
 package com.example.smartclass.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -266,7 +269,11 @@ fun ProfileScreen(
                         label = "Email",
                         value = email,
                         icon = Icons.Default.Email,
-                        onCopy = { /* TODO: копировать email */ },
+                        onCopy = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("email", email))
+                            Toast.makeText(context, "Email скопирован", Toast.LENGTH_SHORT).show()
+                        },
                         onTap = {
                             if (isAdmin) {
                                 adminTapCount++
@@ -281,7 +288,11 @@ fun ProfileScreen(
                         label = "ID пользователя",
                         value = userId,
                         icon = Icons.Default.Fingerprint,
-                        onCopy = { /* TODO: копировать ID */ }
+                        onCopy = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("userId", userId))
+                            Toast.makeText(context, "ID скопирован", Toast.LENGTH_SHORT).show()
+                        }
                     )
                     ProfileInfoItem(
                         label = "Дата регистрации",
@@ -317,7 +328,17 @@ fun ProfileScreen(
                             )
                         }
                         if (!isEmailVerified) {
-                            TextButton(onClick = { /* TODO: отправить повторное письмо */ }) {
+                            TextButton(onClick = {
+                                scope.launch {
+                                    currentUser?.sendEmailVerification()?.addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            Toast.makeText(context, "Письмо отправлено", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(context, "Ошибка отправки", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+                            }) {
                                 Text(
                                     text = "Подтвердить",
                                     style = MaterialTheme.typography.labelLarge,
