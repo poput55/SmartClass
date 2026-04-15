@@ -35,6 +35,13 @@ class AuthViewModel : ViewModel() {
             Log.d(TAG, "State: Loading")
             val result = AuthManager.signIn(email, password)
             if (result.isSuccess) {
+                // Проверяем блокировку
+                if (AuthManager.isCurrentUserBlocked()) {
+                    AuthManager.signOut()
+                    Log.e(TAG, "Пользователь заблокирован")
+                    _authState.value = AuthState.Error("Ваш аккаунт заблокирован. Обратитесь к администратору.")
+                    return@launch
+                }
                 Log.d(TAG, "Вход успешен: $email")
                 _authState.value = AuthState.Success
             } else {

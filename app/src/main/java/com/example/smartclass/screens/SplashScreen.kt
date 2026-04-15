@@ -53,9 +53,20 @@ fun SplashScreen(
             delay(300)
             // Проверка авторизации и роли
             if (AuthManager.isSignedIn()) {
+                // Проверка блокировки
+                if (AuthManager.isCurrentUserBlocked()) {
+                    Log.d("SplashScreen", "Пользователь заблокирован -> Auth")
+                    AuthManager.signOut()
+                    onNavigateToAuth()
+                    return@LaunchedEffect
+                }
                 val userRole = AuthManager.getCurrentUserRole()
                 Log.d("SplashScreen", "userRole = $userRole")
                 when (userRole) {
+                    UserRole.ADMIN -> {
+                        Log.d("SplashScreen", "Навигация на Home (админ)")
+                        onNavigateToHome()
+                    }
                     UserRole.TEACHER -> {
                         Log.d("SplashScreen", "Навигация на TeacherHome")
                         onNavigateToTeacherHome()
@@ -76,7 +87,7 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(Color(0xFFFFFFFF)),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -91,7 +102,7 @@ fun SplashScreen(
 
             Text(
                 text = "SmartClass",
-                color = MaterialTheme.colorScheme.onBackground,
+                color = Color.Black,
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold
             )

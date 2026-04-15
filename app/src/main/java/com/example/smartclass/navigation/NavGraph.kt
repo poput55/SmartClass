@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.smartclass.screens.AdminScreen
 import com.example.smartclass.screens.AuthScreen
 import com.example.smartclass.screens.CreateHomeworkScreen
 import com.example.smartclass.screens.FormulaScreen
@@ -41,6 +42,7 @@ sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Home : Screen("home")
     object TeacherHome : Screen("teacher-home")
+    object Admin : Screen("admin")
     object Topics : Screen("topics")
     object Lesson : Screen("lesson")
     object Practice : Screen("practice")
@@ -110,6 +112,7 @@ fun NavGraph(
         composable(Screen.Profile.route) {
             ProfileScreen(
                 onNavigateBack = { navController.popBackStack() },
+                onNavigateToAdmin = { navController.navigate(Screen.Admin.route) },
                 onLogout = {
                     navController.navigate(Screen.Auth.route) {
                         popUpTo(0) { inclusive = true }
@@ -134,7 +137,8 @@ fun NavGraph(
                 onNavigateToProgress = { navController.navigate(Screen.Progress.route) },
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
                 onNavigateToCreateHomework = { navController.navigate(Screen.CreateHomework.route) },
-                onNavigateToHomeworkList = { navController.navigate(Screen.HomeworkList.route) }
+                onNavigateToHomeworkList = { navController.navigate(Screen.HomeworkList.route) },
+                onNavigateToAdmin = { navController.navigate(Screen.Admin.route) }
             )
         }
 
@@ -146,8 +150,18 @@ fun NavGraph(
                 onNavigateToStudents = { navController.navigate(Screen.StudentsList.route) },
                 onNavigateToReports = { navController.navigate(Screen.TeacherReports.route) },
                 onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
-                onSubjectClick = { },
+                onSubjectClick = { subject ->
+                    // Переход к списку учеников выбранного класса
+                    navController.navigate(Screen.StudentsList.route)
+                },
                 onHomeworkClick = { }
+            )
+        }
+
+        // Admin Screen (для администратора)
+        composable(Screen.Admin.route) {
+            AdminScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

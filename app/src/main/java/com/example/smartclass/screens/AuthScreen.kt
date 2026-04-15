@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,11 +51,13 @@ fun AuthScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var acceptTerms by remember { mutableStateOf(false) }
     var selectedRole by remember { mutableStateOf(UserRole.STUDENT) }
     var selectedGrade by remember { mutableStateOf(7) }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
+    var adminTapCount by remember { mutableStateOf(0) }
+    var showAdminCode by remember { mutableStateOf(false) }
+    var adminCodeInput by remember { mutableStateOf("") }
 
     // Обработка состояний авторизации
     LaunchedEffect(authState) {
@@ -94,7 +97,14 @@ fun AuthScreen(
                             text = "SmartClass",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = Color.White,
+                            modifier = Modifier.clickable {
+                                adminTapCount++
+                                if (adminTapCount >= 10) {
+                                    showAdminCode = true
+                                    adminTapCount = 0
+                                }
+                            }
                         )
                     }
                 },
@@ -160,68 +170,12 @@ fun AuthScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Поля имени и фамилии (только для регистрации)
-                    AnimatedVisibility(
-                        visible = !isSignInMode,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            // Имя
-                            OutlinedTextField(
-                                value = firstName,
-                                onValueChange = { firstName = it },
-                                label = { Text("Имя") },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Person,
-                                        contentDescription = null,
-                                        tint = PrimaryBlue
-                                    )
-                                },
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
-                                    imeAction = ImeAction.Next
-                                ),
-                                singleLine = true,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = PrimaryBlue,
-                                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
-                                )
-                            )
-
-                            // Фамилия
-                            OutlinedTextField(
-                                value = lastName,
-                                onValueChange = { lastName = it },
-                                label = { Text("Фамилия") },
-                                modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.PersonOutline,
-                                        contentDescription = null,
-                                        tint = PrimaryBlue
-                                    )
-                                },
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Text,
-                                    imeAction = ImeAction.Next
-                                ),
-                                singleLine = true,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = PrimaryBlue,
-                                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
-                                )
-                            )
-                        }
+                    if (!isSignInMode) {
+                        NameInputField(firstName, { firstName = it }, "Имя", Icons.Default.Person)
+                        NameInputField(lastName, { lastName = it }, "Фамилия", Icons.Default.PersonOutline)
                     }
 
                     // Email поле с валидацией
@@ -267,15 +221,6 @@ fun AuthScreen(
                         ),
                         singleLine = true,
                         isError = emailError != null,
-                        supportingText = {
-                            if (emailError != null) {
-                                Text(
-                                    text = emailError!!,
-                                    color = Color(0xFFEF5350),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = PrimaryBlue,
                             unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
@@ -328,124 +273,98 @@ fun AuthScreen(
                     )
 
                     // Выбор роли (только для регистрации)
-                    AnimatedVisibility(
-                        visible = !isSignInMode,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "Выберите роль:",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.White
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                FilterChip(
-                                    selected = selectedRole == UserRole.STUDENT,
-                                    onClick = { selectedRole = UserRole.STUDENT },
-                                    label = { Text("Ученик") },
-                                    leadingIcon = if (selectedRole == UserRole.STUDENT) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    } else null,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                FilterChip(
-                                    selected = selectedRole == UserRole.TEACHER,
-                                    onClick = { selectedRole = UserRole.TEACHER },
-                                    label = { Text("Учитель") },
-                                    leadingIcon = if (selectedRole == UserRole.TEACHER) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    } else null,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-
-                            // Выбор класса (только для ученика)
-                            AnimatedVisibility(
-                                visible = selectedRole == UserRole.STUDENT,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = "Выберите класс:",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color.White
-                                    )
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        listOf(7, 8, 9).forEach { grade ->
-                                            FilterChip(
-                                                selected = selectedGrade == grade,
-                                                onClick = { selectedGrade = grade },
-                                                label = { Text("$grade класс") },
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    AnimatedVisibility(
-                        visible = !isSignInMode,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
+                    if (!isSignInMode) {
+                        Text(
+                            text = "Выберите роль:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Checkbox(
-                                checked = acceptTerms,
-                                onCheckedChange = { acceptTerms = it },
-                                colors = CheckboxDefaults.colors(
-                                    checkedColor = PrimaryBlue
-                                )
+                            FilterChip(
+                                selected = selectedRole == UserRole.STUDENT,
+                                onClick = { selectedRole = UserRole.STUDENT },
+                                label = { Text("Ученик") },
+                                leadingIcon = if (selectedRole == UserRole.STUDENT) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                } else null,
+                                modifier = Modifier.weight(1f)
                             )
-                            Text(
-                                text = "Я согласен с ",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
+                            FilterChip(
+                                selected = selectedRole == UserRole.TEACHER,
+                                onClick = { selectedRole = UserRole.TEACHER },
+                                label = { Text("Учитель") },
+                                leadingIcon = if (selectedRole == UserRole.TEACHER) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                } else null,
+                                modifier = Modifier.weight(1f)
                             )
-                            TextButton(
-                                onClick = { /* TODO: открыть условия */ },
-                                contentPadding = PaddingValues(0.dp)
+                        }
+
+                        // ADMIN (скрытый, появляется после ввода кода)
+                        if (selectedRole == UserRole.ADMIN) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                             ) {
-                                Text(
-                                    text = "условиями использования",
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        color = PrimaryBlue,
-                                        fontWeight = FontWeight.Medium
+                                FilterChip(
+                                    selected = true,
+                                    onClick = { /* неактивен */ },
+                                    label = { Text("Администратор") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.AdminPanelSettings,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = Color(0xFF6750A4).copy(alpha = 0.2f),
+                                        selectedLabelColor = Color(0xFF6750A4),
+                                        selectedLeadingIconColor = Color(0xFF6750A4)
                                     )
                                 )
+                            }
+                        }
+
+                        // Выбор класса (только для ученика)
+                        if (selectedRole == UserRole.STUDENT) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "Выберите класс:",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    listOf(7, 8, 9).forEach { grade ->
+                                        FilterChip(
+                                            selected = selectedGrade == grade,
+                                            onClick = { selectedGrade = grade },
+                                            label = { Text("$grade класс") },
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -453,10 +372,6 @@ fun AuthScreen(
                     // Кнопка входа/регистрации
                     Button(
                         onClick = {
-                            if (!isSignInMode && !acceptTerms) {
-                                Toast.makeText(context, "Примите условия использования", Toast.LENGTH_SHORT).show()
-                                return@Button
-                            }
                             if (!isSignInMode && (firstName.isBlank() || lastName.isBlank())) {
                                 Toast.makeText(context, "Введите имя и фамилию", Toast.LENGTH_SHORT).show()
                                 return@Button
@@ -472,7 +387,7 @@ fun AuthScreen(
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        enabled = !isLoading && (isSignInMode || acceptTerms) && email.isNotBlank() && password.isNotBlank(),
+                        enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = PrimaryBlue
                         )
@@ -556,7 +471,6 @@ fun AuthScreen(
                 )
                 TextButton(onClick = {
                     viewModel.toggleAuthMode()
-                    acceptTerms = false
                 }) {
                     Text(
                         text = if (isSignInMode) "Зарегистрироваться" else "Войти",
@@ -569,6 +483,73 @@ fun AuthScreen(
 
         }
     }
+
+    // Скрытый диалог для активации админа (секретный код: "admin2024")
+    // Активация: 10 тапов по заголовку "SmartClass" в шапке
+    if (showAdminCode) {
+        AlertDialog(
+            onDismissRequest = { showAdminCode = false },
+            title = { Text("Код доступа") },
+            text = {
+                OutlinedTextField(
+                    value = adminCodeInput,
+                    onValueChange = { adminCodeInput = it },
+                    label = { Text("Введите код") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (adminCodeInput == "admin2024") {
+                        selectedRole = UserRole.ADMIN
+                        showAdminCode = false
+                        adminCodeInput = ""
+                        Toast.makeText(context, "Режим администратора активирован", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Text("Подтвердить")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAdminCode = false }) {
+                    Text("Отмена")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun NameInputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        leadingIcon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = PrimaryBlue,
+                modifier = Modifier.size(20.dp)
+            )
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+        ),
+        singleLine = true,
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = PrimaryBlue,
+            unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f)
+        )
+    )
 }
 
 @Preview(device = "spec:parent=pixel_5,orientation=portrait", showBackground = true)

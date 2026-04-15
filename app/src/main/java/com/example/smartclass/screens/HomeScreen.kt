@@ -41,7 +41,8 @@ fun HomeScreen(
     onNavigateToProgress: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToCreateHomework: () -> Unit,
-    onNavigateToHomeworkList: () -> Unit
+    onNavigateToHomeworkList: () -> Unit,
+    onNavigateToAdmin: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
