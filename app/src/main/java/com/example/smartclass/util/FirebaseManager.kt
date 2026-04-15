@@ -7,9 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 private const val TAG = "FirebaseManager"
 
-/**
- * Менеджер для управления подключением к Firebase
- */
+
 object FirebaseManager {
 
     val database: FirebaseDatabase by lazy {

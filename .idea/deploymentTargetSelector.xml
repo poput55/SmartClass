@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="SmartClass">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-09T06:14:34.672420400Z">
+        <DropdownSelection timestamp="2026-04-09T07:51:33.275305300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\ASUS\.android\avd\Pixel_3.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=LNJBN7NNHA6HDEIV" />
             </handle>
           </Target>
         </DropdownSelection>

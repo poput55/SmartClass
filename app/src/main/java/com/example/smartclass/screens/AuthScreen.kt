@@ -51,7 +51,6 @@ fun AuthScreen(
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
-    var acceptTerms by remember { mutableStateOf(false) }
     var selectedRole by remember { mutableStateOf(UserRole.STUDENT) }
     var selectedGrade by remember { mutableStateOf(7) }
     var firstName by remember { mutableStateOf("") }
@@ -115,16 +114,12 @@ fun AuthScreen(
             )
         }
     ) { paddingValues ->
-        BoxWithConstraints {
-            val isSmallScreen = maxWidth < 360.dp
-            val contentPadding = if (isSmallScreen) 12.dp else 16.dp
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(contentPadding),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -175,31 +170,12 @@ fun AuthScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Поля имени и фамилии (только для регистрации)
-                    AnimatedVisibility(
-                        visible = !isSignInMode,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        if (isSmallScreen) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                NameInputField(firstName, { firstName = it }, "Имя", Icons.Default.Person)
-                                NameInputField(lastName, { lastName = it }, "Фамилия", Icons.Default.PersonOutline)
-                            }
-                        } else {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                NameInputField(firstName, { firstName = it }, "Имя", Icons.Default.Person)
-                                NameInputField(lastName, { lastName = it }, "Фамилия", Icons.Default.PersonOutline)
-                            }
-                        }
+                    if (!isSignInMode) {
+                        NameInputField(firstName, { firstName = it }, "Имя", Icons.Default.Person)
+                        NameInputField(lastName, { lastName = it }, "Фамилия", Icons.Default.PersonOutline)
                     }
 
                     // Email поле с валидацией
@@ -245,15 +221,6 @@ fun AuthScreen(
                         ),
                         singleLine = true,
                         isError = emailError != null,
-                        supportingText = {
-                            if (emailError != null) {
-                                Text(
-                                    text = emailError!!,
-                                    color = Color(0xFFEF5350),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        },
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = PrimaryBlue,
                             unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
@@ -306,158 +273,97 @@ fun AuthScreen(
                     )
 
                     // Выбор роли (только для регистрации)
-                    AnimatedVisibility(
-                        visible = !isSignInMode,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(
-                                text = "Выберите роль:",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.White
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                FilterChip(
-                                    selected = selectedRole == UserRole.STUDENT,
-                                    onClick = { selectedRole = UserRole.STUDENT },
-                                    label = { Text("Ученик") },
-                                    leadingIcon = if (selectedRole == UserRole.STUDENT) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    } else null,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                FilterChip(
-                                    selected = selectedRole == UserRole.TEACHER,
-                                    onClick = { selectedRole = UserRole.TEACHER },
-                                    label = { Text("Учитель") },
-                                    leadingIcon = if (selectedRole == UserRole.TEACHER) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        }
-                                    } else null,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-
-                            // ADMIN (скрытый, появляется после ввода кода)
-                            AnimatedVisibility(
-                                visible = selectedRole == UserRole.ADMIN,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                                ) {
-                                    FilterChip(
-                                        selected = true,
-                                        onClick = { /* неактивен */ },
-                                        label = { Text("Администратор") },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.AdminPanelSettings,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                        },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        colors = FilterChipDefaults.filterChipColors(
-                                            selectedContainerColor = Color(0xFF6750A4).copy(alpha = 0.2f),
-                                            selectedLabelColor = Color(0xFF6750A4),
-                                            selectedLeadingIconColor = Color(0xFF6750A4)
-                                        )
-                                    )
-                                }
-                            }
-
-                            // Выбор класса (только для ученика)
-                            AnimatedVisibility(
-                                visible = selectedRole == UserRole.STUDENT,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = "Выберите класс:",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color.White
-                                    )
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        listOf(7, 8, 9).forEach { grade ->
-                                            FilterChip(
-                                                selected = selectedGrade == grade,
-                                                onClick = { selectedGrade = grade },
-                                                label = { Text("$grade класс") },
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    AnimatedVisibility(
-                        visible = !isSignInMode,
-                        enter = expandVertically() + fadeIn(),
-                        exit = shrinkVertically() + fadeOut()
-                    ) {
+                    if (!isSignInMode) {
+                        Text(
+                            text = "Выберите роль:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Checkbox(
-                                checked = acceptTerms,
-                                onCheckedChange = { acceptTerms = it },
-                                colors = CheckboxDefaults.colors(
-                                    checkedColor = PrimaryBlue
-                                )
+                            FilterChip(
+                                selected = selectedRole == UserRole.STUDENT,
+                                onClick = { selectedRole = UserRole.STUDENT },
+                                label = { Text("Ученик") },
+                                leadingIcon = if (selectedRole == UserRole.STUDENT) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                } else null,
+                                modifier = Modifier.weight(1f)
                             )
+                            FilterChip(
+                                selected = selectedRole == UserRole.TEACHER,
+                                onClick = { selectedRole = UserRole.TEACHER },
+                                label = { Text("Учитель") },
+                                leadingIcon = if (selectedRole == UserRole.TEACHER) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                } else null,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+
+                        // ADMIN (скрытый, появляется после ввода кода)
+                        if (selectedRole == UserRole.ADMIN) {
                             Row(
-                                modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                            ) {
+                                FilterChip(
+                                    selected = true,
+                                    onClick = { /* неактивен */ },
+                                    label = { Text("Администратор") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.AdminPanelSettings,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = Color(0xFF6750A4).copy(alpha = 0.2f),
+                                        selectedLabelColor = Color(0xFF6750A4),
+                                        selectedLeadingIconColor = Color(0xFF6750A4)
+                                    )
+                                )
+                            }
+                        }
+
+                        // Выбор класса (только для ученика)
+                        if (selectedRole == UserRole.STUDENT) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
-                                    text = "Я согласен с ",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Color.Gray
+                                    text = "Выберите класс:",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium
                                 )
-                                TextButton(
-                                    onClick = { /* TODO: открыть условия */ },
-                                    contentPadding = PaddingValues(0.dp)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Text(
-                                        text = "условиями использования",
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = PrimaryBlue,
-                                            fontWeight = FontWeight.Medium
+                                    listOf(7, 8, 9).forEach { grade ->
+                                        FilterChip(
+                                            selected = selectedGrade == grade,
+                                            onClick = { selectedGrade = grade },
+                                            label = { Text("$grade класс") },
+                                            modifier = Modifier.weight(1f)
                                         )
-                                    )
+                                    }
                                 }
                             }
                         }
@@ -466,10 +372,6 @@ fun AuthScreen(
                     // Кнопка входа/регистрации
                     Button(
                         onClick = {
-                            if (!isSignInMode && !acceptTerms) {
-                                Toast.makeText(context, "Примите условия использования", Toast.LENGTH_SHORT).show()
-                                return@Button
-                            }
                             if (!isSignInMode && (firstName.isBlank() || lastName.isBlank())) {
                                 Toast.makeText(context, "Введите имя и фамилию", Toast.LENGTH_SHORT).show()
                                 return@Button
@@ -485,7 +387,7 @@ fun AuthScreen(
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        enabled = !isLoading && (isSignInMode || acceptTerms) && email.isNotBlank() && password.isNotBlank(),
+                        enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = PrimaryBlue
                         )
@@ -569,7 +471,6 @@ fun AuthScreen(
                 )
                 TextButton(onClick = {
                     viewModel.toggleAuthMode()
-                    acceptTerms = false
                 }) {
                     Text(
                         text = if (isSignInMode) "Зарегистрироваться" else "Войти",
@@ -580,7 +481,6 @@ fun AuthScreen(
                 }
             }
 
-        }
         }
     }
 

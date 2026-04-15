@@ -10,7 +10,6 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-// Custom Colors for Algebra App
 val PrimaryBlue = Color(0xFF2196F3)
 val PrimaryBlueDark = Color(0xFF1976D2)
 val SecondaryOrange = Color(0xFFFF9800)
@@ -19,7 +18,6 @@ val ErrorRed = Color(0xFFF44336)
 val BackgroundLight = Color(0xFFF5F5F5)
 val CardBackground = Color(0xFFFFFFFF)
 
-// Grade Colors
 val Grade7Color = Color(0xFF4CAF50)
 val Grade8Color = Color(0xFF2196F3)
 val Grade9Color = Color(0xFF9C27B0)
