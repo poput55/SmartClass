@@ -1,6 +1,5 @@
 package com.example.smartclass.screens
 
-import android.R
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable

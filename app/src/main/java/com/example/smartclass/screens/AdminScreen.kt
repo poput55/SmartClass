@@ -146,8 +146,8 @@ fun AdminScreen(
                             },
                             onBlockClick = {
                                 scope.launch {
-                                    val userId = user["id"] as String
-                                    val isBlocked = user["isBlocked"] as Boolean
+                                    val userId = user["id"] as? String ?: return@launch
+                                    val isBlocked = user["isBlocked"] as? Boolean ?: false
                                     val result = AuthManager.setBlocked(userId, !isBlocked)
                                     if (result.isSuccess) {
                                         loadUsers { users = it }
@@ -158,7 +158,7 @@ fun AdminScreen(
                             },
                             onDeleteClick = {
                                 scope.launch {
-                                    val userId = user["id"] as String
+                                    val userId = user["id"] as? String ?: return@launch
                                     val result = AuthManager.deleteUser(userId)
                                     if (result.isSuccess) {
                                         loadUsers { users = it }
@@ -207,7 +207,7 @@ fun AdminScreen(
             },
             onRoleChanged = { newRole ->
                 scope.launch {
-                    val userId = currentUser["id"] as String
+                    val userId = currentUser["id"] as? String ?: return@launch
                     val result = AuthManager.changeUserRole(userId, newRole)
                     if (result.isSuccess) {
                         loadUsers { users = it }
