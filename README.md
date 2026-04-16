@@ -31,20 +31,6 @@
 
 ---
 
-## 📸 Скриншоты
-
-| Главный экран | Теория | Тестирование |
-| :---: | :---: | :---: |
-| <img src="screenshots/student_main.png" width="250"> | <img src="screenshots/topic_detail.png" width="250"> | <img src="screenshots/test_process.png" width="250"> |
-
-| Кабинет учителя | Статистика | Авторизация |
-| :---: | :---: | :---: |
-| <img src="screenshots/teacher_cabinet.png" width="250"> | <img src="screenshots/teacher_stats.png" width="250"> | <img src="screenshots/auth_screen.png" width="250"> |
-
-*(Замените пути к изображениям на реальные файлы в вашей папке `screenshots`)*
-
----
-
 ## ⚙️ Установка и Запуск
 
 ### Требования
