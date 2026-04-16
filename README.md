@@ -6,9 +6,9 @@
 
 ### ⬇️ Скачать приложение
 
-[![Скачать APK](https://img.shields.io/badge/Скачать-SmartClass.apk-green?style=for-the-badge&logo=android)]((https://github.com/poput55/SmartClass/releases/tag/V1.0))
+[![Скачать APK](https://img.shields.io/badge/Скачать-SmartClass.apk-green?style=for-the-badge&logo=android)](ВСТАВЬТЕ_СЮДА_ПРЯМУЮ_ССЫЛКУ_НА_ФАЙЛ.apk)
 
-*(Нажмите на кнопку выше, чтобы скачать последнюю версию APK)*
+*(Нажмите на кнопку выше, чтобы скачать APK)*
 
 ---
 
